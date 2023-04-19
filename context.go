@@ -2,6 +2,7 @@ package ginmiddleware
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -40,4 +41,12 @@ func CtxLogger(ctx context.Context) *zerolog.Logger {
 	}
 	logger := logContext.Logger()
 	return &logger
+}
+
+func InjectContextRequestHeader(ctx context.Context, req *http.Request) {
+	ctxMetas := GetContextMetaData(ctx)
+	for i := range ctxMetas {
+		ctxMeta := ctxMetas[i]
+		req.Header.Add(ctxMeta.Key, ctxMeta.Value)
+	}
 }
