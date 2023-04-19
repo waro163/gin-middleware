@@ -23,6 +23,8 @@ func AddRequestID() gin.HandlerFunc {
 			WithMoreContextMeta(c.Request.Context(), ContextMetaData{Key: HeaderXRequestID, Value: reqID}),
 		)
 
+		// Set the id to ensure that the requestid is in the response
+		c.Header(HeaderXRequestID, reqID)
 		c.Next()
 	}
 }
