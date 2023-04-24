@@ -16,7 +16,10 @@ const (
 	Method         string = "Method"
 	Host           string = "Host"
 	Uri            string = "Uri"
-	Header         string = "Header"
+	ReqHeader      string = "ReqHeader"
+	ReqBody        string = "ReqBody"
+	RespHeader     string = "RespHeader"
+	RespBody       string = "RespBody"
 	StatusCode     string = "StatusCode"
 	Latency        string = "Latency"
 )
@@ -49,12 +52,14 @@ func (l *RequestLog) AddRequestLog() gin.HandlerFunc {
 		c.Next()
 
 		latency := time.Since(start)
+		respHeaderBytes, _ := json.Marshal(c.Writer.Header())
 		subLog := logger.With().Str(TimeStamp, start.String()).
 			Str(Method, method).
 			Str(Host, host).
 			Str(Uri, uri).
-			RawJSON(Header, headerBytes).
+			RawJSON(ReqHeader, headerBytes).
 			Int(StatusCode, c.Writer.Status()).
+			RawJSON(RespHeader, respHeaderBytes).
 			Str(Latency, fmt.Sprintf("%v", latency)).
 			Logger()
 		subLog.Info().Msg(RequestLogChar)
