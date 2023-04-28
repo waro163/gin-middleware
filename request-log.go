@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/waro163/gin-middleware/utils"
 )
 
 const (
@@ -70,14 +72,26 @@ func (l *RequestLog) AddRequestLog() gin.HandlerFunc {
 			Logger()
 		reqLog.Info().Msg(RequestLogChar)
 
+		w := utils.Get(c.Writer)
+
+		// if status is 404 or 405, gin will handle those at last, but our *utils.WrapResponseWriter had been put nil
+		status := c.Writer.Status()
+		if status != http.StatusNotFound && status != http.StatusMethodNotAllowed {
+			c.Writer = w
+		}
+
+		defer func() {
+			utils.Put(w)
+		}()
+
 		c.Next()
 
 		latency := time.Since(start)
 		respHeaderBytes, _ := json.Marshal(c.Writer.Header())
 		respLog := subLog.With().
-			Int(StatusCode, c.Writer.Status()).
+			Int(StatusCode, status).
 			RawJSON(RespHeader, respHeaderBytes).
-			RawJSON(RespBody, []byte("TBD")).
+			RawJSON(RespBody, w.GetBody()).
 			Str(Latency, fmt.Sprintf("%v", latency)).
 			Logger()
 		respLog.Info().Msg(ResponseLogChar)
