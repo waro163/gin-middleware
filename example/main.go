@@ -12,7 +12,7 @@ func main() {
 	writer := os.Stdout
 	log := &gmw.RequestLog{Output: writer}
 
-	r.Use(gmw.AddRequestID(), gmw.Recovery(writer), log.AddRequestLog())
+	r.Use(gmw.AddRequestID(), log.AddRequestLog(), gmw.Recovery(writer))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
