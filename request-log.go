@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	bbpool "github.com/valyala/bytebufferpool"
 	"github.com/waro163/gin-middleware/utils"
 )
 
@@ -72,16 +73,19 @@ func (l *RequestLog) AddRequestLog() gin.HandlerFunc {
 			Logger()
 		reqLog.Info().Msg(RequestLogChar)
 
-		w := utils.Get(c.Writer)
+		bbuffer := bbpool.Get()
 
 		// if status is 404 or 405, gin will handle those at last, but our *utils.WrapResponseWriter had been put nil
 		status := c.Writer.Status()
 		if status != http.StatusNotFound && status != http.StatusMethodNotAllowed {
-			c.Writer = w
+			c.Writer = &utils.WrapResponseWriter{
+				ResponseWriter: c.Writer,
+				ByteBuffer:     bbuffer,
+			}
 		}
 
 		defer func() {
-			utils.Put(w)
+			bbpool.Put(bbuffer)
 		}()
 
 		c.Next()
@@ -91,7 +95,7 @@ func (l *RequestLog) AddRequestLog() gin.HandlerFunc {
 		respLog := subLog.With().
 			Int(StatusCode, status).
 			RawJSON(RespHeader, respHeaderBytes).
-			RawJSON(RespBody, w.GetBody()).
+			RawJSON(RespBody, bbuffer.Bytes()).
 			Str(Latency, fmt.Sprintf("%v", latency)).
 			Logger()
 		respLog.Info().Msg(ResponseLogChar)
