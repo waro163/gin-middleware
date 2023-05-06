@@ -17,6 +17,10 @@ var (
 	_ IgetAuthToken = (*QueryAuthToken)(nil)
 )
 
+var (
+	JWTHeaderAuthToken = HeaderAuthToken{Key: "Authorization", ValueHeader: "Bearer"}
+)
+
 type HeaderAuthToken struct {
 	Key         string
 	ValueHeader string
