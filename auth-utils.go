@@ -58,7 +58,7 @@ func (q *QueryAuthToken) GetAuthToken(r *http.Request) (string, error) {
 }
 
 type IAuthenticator interface {
-	Authenticate(token string) (map[string]interface{}, *Error)
+	Authenticate(token string) (interface{}, *Error)
 }
 
 var (
@@ -71,7 +71,7 @@ type JWTAuthenticator struct {
 	GetPublicSecret func(*jwt.Token) (interface{}, error)
 }
 
-func (a *JWTAuthenticator) Authenticate(token string) (map[string]interface{}, *Error) {
+func (a *JWTAuthenticator) Authenticate(token string) (interface{}, *Error) {
 	if token == "" {
 		return nil, &Error{
 			Code:    -1,
