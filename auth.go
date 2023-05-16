@@ -42,3 +42,7 @@ func (auth *AuthMiddleware) ValidateAuth() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func (auth *AuthMiddleware) GetAuthPayload(c *gin.Context) (interface{}, bool) {
+	return c.Get(AuthPayload)
+}
