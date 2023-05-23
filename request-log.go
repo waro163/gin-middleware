@@ -91,6 +91,7 @@ func (l *RequestLog) AddRequestLog() gin.HandlerFunc {
 		c.Next()
 
 		latency := time.Since(start)
+		status = c.Writer.Status()
 		respHeaderBytes, _ := json.Marshal(c.Writer.Header())
 		respLog := subLog.With().
 			Int(StatusCode, status).
