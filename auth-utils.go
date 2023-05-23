@@ -20,6 +20,7 @@ var (
 var (
 	JWTHeaderAuthToken   = HeaderAuthToken{Key: "Authorization", ValueHeader: "bearer"}
 	BasicHeaderAuthToken = HeaderAuthToken{Key: "Authorization", ValueHeader: "basic"}
+	JWTQueryAuthToken    = QueryAuthToken{Key: "access_token"}
 )
 
 type HeaderAuthToken struct {
