@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type IgetAuthToken interface {
@@ -79,7 +79,7 @@ func (a *JWTAuthenticator) Authenticate(token string) (interface{}, *Error) {
 			Message: "missing authorization token",
 		}
 	}
-	jwtToken, err := jwt.Parse(token, a.GetPublicSecret)
+	jwtToken, err := jwt.Parse(token, a.GetPublicSecret, jwt.WithIssuer(a.Issuer), jwt.WithAudience(a.Audience))
 	if err != nil {
 		return nil, &Error{
 			Code:    -2,
@@ -97,20 +97,6 @@ func (a *JWTAuthenticator) Authenticate(token string) (interface{}, *Error) {
 		return nil, &Error{
 			Code:    -4,
 			Message: "invalid jwt token",
-		}
-	}
-
-	if !claims.VerifyAudience(a.Audience, true) {
-		return nil, &Error{
-			Code:    -5,
-			Message: "invalid audience",
-		}
-	}
-
-	if !claims.VerifyIssuer(a.Issuer, true) {
-		return nil, &Error{
-			Code:    -6,
-			Message: "invalid issuer",
 		}
 	}
 
