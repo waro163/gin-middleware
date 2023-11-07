@@ -17,3 +17,8 @@
 ## request id
 
 部分代码来自于[requestid](https://github.com/gin-contrib/requestid)
+
+## opentelemertry
+[opentelemetry](https://github.com/open-telemetry/opentelemetry-go-contrib)
+
+go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin
