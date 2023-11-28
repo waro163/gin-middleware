@@ -19,6 +19,7 @@ type ContextMetaData struct {
 	Value string
 }
 
+// GetContextMetaData get GetContextMetaData slice from incoming context
 func GetContextMetaData(ctx context.Context) []ContextMetaData {
 	if ctxMetas, ok := ctx.Value(ContextMetaKey(ContextKey)).([]ContextMetaData); ok {
 		return ctxMetas
@@ -26,6 +27,7 @@ func GetContextMetaData(ctx context.Context) []ContextMetaData {
 	return make([]ContextMetaData, 0)
 }
 
+// WithMoreContextMeta add extra ContextMetaData to incoming context
 func WithMoreContextMeta(ctx context.Context, data ...ContextMetaData) context.Context {
 	rawData := GetContextMetaData(ctx)
 	rawData = append(rawData, data...)
@@ -33,6 +35,7 @@ func WithMoreContextMeta(ctx context.Context, data ...ContextMetaData) context.C
 	return newCtx
 }
 
+// CtxLogger put the ContextMetaData of incoming context into log
 func CtxLogger(ctx context.Context) *zerolog.Logger {
 	data := GetContextMetaData(ctx)
 	logContext := log.With()
@@ -49,4 +52,12 @@ func InjectContextRequestHeader(ctx context.Context, req *http.Request) {
 		ctxMeta := ctxMetas[i]
 		req.Header.Add(ctxMeta.Key, ctxMeta.Value)
 	}
+}
+
+// NewContextWithMeta new a context with incoming context metadata
+// when we want to run a go routine in background, we should use this function
+// and also can get those metadata from output context
+func NewContextWithMeta(ctx context.Context) context.Context {
+	rawData := GetContextMetaData(ctx)
+	return context.WithValue(context.Background(), ContextMetaKey(ContextKey), rawData)
 }
