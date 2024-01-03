@@ -4,7 +4,7 @@
 
 <https://github.com/gin-contrib>
 
-[core](https://github.com/gin-contrib/cors)
+[cors](https://github.com/gin-contrib/cors)
 
 [pprof](https://github.com/gin-contrib/pprof)
 
