@@ -23,6 +23,20 @@ var (
 	JWTQueryAuthToken    = QueryAuthToken{Key: "access_token"}
 )
 
+type customGetAuthToken struct {
+	fun func(*http.Request) (string, error)
+}
+
+func (custom *customGetAuthToken) GetAuthToken(req *http.Request) (string, error) {
+	return custom.fun(req)
+}
+
+func NewCustomGetAuthToken(fun func(*http.Request) (string, error)) IgetAuthToken {
+	return &customGetAuthToken{
+		fun: fun,
+	}
+}
+
 type HeaderAuthToken struct {
 	Key         string
 	ValueHeader string
