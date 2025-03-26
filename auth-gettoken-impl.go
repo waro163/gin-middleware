@@ -45,7 +45,7 @@ func (h *HeaderAuthToken) GetAuthToken(r *http.Request) (string, error) {
 	}
 
 	authHeaderParts := strings.Split(authHeader, " ")
-	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != h.ValueHeader {
+	if len(authHeaderParts) != 2 || !strings.EqualFold(authHeaderParts[0], h.ValueHeader) {
 		return "", ErrorHeaderAuthFormat
 	}
 
