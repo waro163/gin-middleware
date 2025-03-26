@@ -6,7 +6,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var AuthPayload string = "auth-payload"
+const (
+	AuthPayload = "auth-payload"
+
+	ACCESS_TOKEN_SUBJECT  = "access_token"
+	REFRESH_TOKEN_SUBJECT = "refresh_token"
+)
+
+type IgetAuthToken interface {
+	GetAuthToken(*http.Request) (string, error)
+}
+
+var (
+	_ IgetAuthToken = (*HeaderAuthToken)(nil)
+	_ IgetAuthToken = (*QueryAuthToken)(nil)
+)
+
+type IAuthenticator interface {
+	Authenticate(token string) (interface{}, *Error)
+}
+
+var (
+	_ IAuthenticator = (*CommonJwtAuthenticator)(nil)
+	_ IAuthenticator = (*CustomJwtAuthenticator)(nil)
+	_ IAuthenticator = (*M2mJwtAuthenticator)(nil)
+)
 
 func NewAuthMiddleware(getToken IgetAuthToken, authenticator IAuthenticator) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -75,8 +99,4 @@ func (auth *AuthMiddleware) ValidateAuth() gin.HandlerFunc {
 		c.Set(AuthPayload, claims)
 		c.Next()
 	}
-}
-
-func (auth *AuthMiddleware) GetAuthPayload(c *gin.Context) (interface{}, bool) {
-	return c.Get(AuthPayload)
 }
