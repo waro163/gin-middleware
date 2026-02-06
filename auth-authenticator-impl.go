@@ -35,6 +35,16 @@ type CustomJwtAuthenticator struct {
 	JwtParse utils.IJwtParser
 }
 
+func NewCustomJwtAuthenticator(audience, issuer, subject string, jwksUrl string) *CustomJwtAuthenticator {
+	jwtParser := utils.NewJwtParse(jwksUrl, nil, nil)
+	return &CustomJwtAuthenticator{
+		Audience: audience,
+		Issuer:   issuer,
+		Subject:  subject,
+		JwtParse: jwtParser,
+	}
+}
+
 type MyCustomClaims struct {
 	Uid string `json:"uid"`
 	jwt.RegisteredClaims
@@ -61,8 +71,20 @@ func (auth *CustomJwtAuthenticator) Authenticate(token string) (interface{}, *Er
 type M2mJwtAuthenticator struct {
 	Audience string
 	Issuer   string
+	Subject  string
 	Scope    string
 	JwtParse utils.IJwtParser
+}
+
+func NewM2mJwtAuthenticator(audience, issuer, subject, scope, jwksUrl string) *M2mJwtAuthenticator {
+	jwtParser := utils.NewJwtParse(jwksUrl, nil, nil)
+	return &M2mJwtAuthenticator{
+		Audience: audience,
+		Issuer:   issuer,
+		Subject:  subject,
+		Scope:    scope,
+		JwtParse: jwtParser,
+	}
 }
 
 type M2mClaims struct {
@@ -77,18 +99,12 @@ func (auth *M2mJwtAuthenticator) Authenticate(token string) (interface{}, *Error
 			Message: "missing authorization token",
 		}
 	}
-	parseToken, err := auth.JwtParse.ParseJwtToken(token, &M2mClaims{}, jwt.WithIssuer(auth.Issuer), jwt.WithIssuedAt(), jwt.WithAudience(auth.Audience), jwt.WithExpirationRequired())
+	claims := M2mClaims{}
+	_, err := auth.JwtParse.ParseJwtToken(token, &claims, jwt.WithIssuer(auth.Issuer), jwt.WithIssuedAt(), jwt.WithAudience(auth.Audience), jwt.WithExpirationRequired(), jwt.WithSubject(auth.Subject))
 	if err != nil {
 		return nil, &Error{
 			Code:    -2,
 			Message: err.Error(),
-		}
-	}
-	claims, ok := parseToken.Claims.(*M2mClaims)
-	if !ok {
-		return nil, &Error{
-			Code:    -3,
-			Message: "invalid claims",
 		}
 	}
 	if auth.Scope != "" && claims.Scp != auth.Scope {
